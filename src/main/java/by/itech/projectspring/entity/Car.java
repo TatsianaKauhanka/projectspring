@@ -1,8 +1,5 @@
-package by.itech.projectspring.bean;
+package by.itech.projectspring.entity;
 
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,19 +13,19 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "car_type")
+@DiscriminatorValue(value = "car")
 public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @NotNull
-    @JsonProperty("model")
     private String model;
 
     @NotNull
     @Column(unique = true)
-    @JsonProperty("vinNumber")
     private UUID vinNumber;
 
     @Override

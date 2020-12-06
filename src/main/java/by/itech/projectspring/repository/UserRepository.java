@@ -1,6 +1,6 @@
-package by.itech.projectspring.persistence;
+package by.itech.projectspring.repository;
 
-import by.itech.projectspring.bean.User;
+import by.itech.projectspring.entity.User;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

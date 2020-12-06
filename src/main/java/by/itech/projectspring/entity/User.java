@@ -1,11 +1,10 @@
-package by.itech.projectspring.bean;
+package by.itech.projectspring.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.action.internal.OrphanRemovalAction;
 
 
 import javax.persistence.*;
@@ -16,30 +15,32 @@ import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = "uuid")})
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "user_type")
+@DiscriminatorValue("user")
 public class User {
-    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(unique = true)
     @NotNull
-    @JsonProperty("uuid")
     private UUID uuid;
 
     @NotNull
-    @JsonProperty("lastName")
     private String lastName;
 
     @NotNull
-    @JsonProperty("firstName")
     private String firstName;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "license_id")
+    private DriverLicense license;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
-    @JsonProperty("carList")
     private List<Car> carList = new ArrayList<>();
 }

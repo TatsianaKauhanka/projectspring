@@ -1,39 +1,61 @@
 package by.itech.projectspring.controller;
 
 
-import by.itech.projectspring.bean.Car;
-import by.itech.projectspring.service.CarServiceInterface;
+import by.itech.projectspring.dto.CarDTO;
+import by.itech.projectspring.entity.Car;
+import by.itech.projectspring.service.VehicleServiceI;
 
+import by.itech.projectspring.utils.mapper.CarMapper;
 import lombok.RequiredArgsConstructor;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
-@RequestMapping("/car")
+@RequestMapping("/vehicle")
 @RequiredArgsConstructor
 public class CarController {
+    private final VehicleServiceI<Car> carService;
+    private final CarMapper carMapper;
 
-    private final CarServiceInterface<Car> carService;
-
-    @PostMapping
-    protected @ResponseBody Car doPost(@RequestBody Car car) {
-        return carService.save(car);
+    @PostMapping("/{subtype}")
+    protected @ResponseBody
+    CarDTO doPost(@RequestBody CarDTO carDTO, @PathVariable String subtype) {
+        log.debug("Car {} is saving", carDTO);
+        carDTO.setCarType(subtype);
+        Car carFromDTO = carMapper.carDTOtoCarEntity(carDTO);
+        Car carFromBD = carService.save(carFromDTO);
+        CarDTO carDTOFromBD = carMapper.carEntityToCarDTO(carFromBD);
+        log.debug("Car{} has been saved", carFromDTO.getVinNumber());
+        return carDTOFromBD;
     }
 
     @GetMapping(value = "/{vinNumber}")
-    public  Car doGet(@PathVariable ("vinNumber") UUID vinNumber){
-        return carService.get(vinNumber);
+    protected CarDTO doGet(@PathVariable("vinNumber") UUID vinNumber) {
+        log.debug("Getting car with vinNumber {}", vinNumber);
+        CarDTO carDTOFromBD = carMapper.carEntityToCarDTO(carService.get(vinNumber));
+        log.debug("Car with vinNumber {} has been gotten from BD", vinNumber);
+        return carDTOFromBD;
     }
 
-    @PutMapping
-    protected @ResponseBody void doPut(@RequestBody Car car){
-       carService.update(car);
+    @PutMapping(value = "/{subtype}/{vinNumber}")
+    protected void doPut(@RequestBody CarDTO carDTO, @PathVariable UUID vinNumber, @PathVariable String subtype) {
+        log.debug("Updating car with vin Number {}", vinNumber);
+        carDTO.setVinNumber(vinNumber);
+        carDTO.setCarType(subtype);
+        Car carFromDTO = carMapper.carDTOtoCarEntity(carDTO);
+        carService.update(carFromDTO);
+        log.debug("Car with vin number {} has been updated", carDTO.getVinNumber());
     }
 
     @DeleteMapping(value = "/{vinNumber}")
-    public  void doDelete(@PathVariable ("vinNumber") UUID vinNumber){
+    protected void doDelete(@PathVariable("vinNumber") UUID vinNumber) {
+        log.debug("Deleting car with vin Number {}", vinNumber);
         carService.delete(vinNumber);
+        log.debug("Car with vin number {} has been deleted", vinNumber);
     }
 
 }
